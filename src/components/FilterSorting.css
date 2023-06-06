@@ -1,0 +1,27 @@
+.filter-sorting {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px;
+    background-color: #fff;
+  }
+
+  .filter-label{
+      padding: 20px;
+  }
+  
+  .filter-sorting-row {
+    display: flex;
+    align-items: center;
+  }
+  
+  .filter-label {
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  
+  .filter-select {
+    padding: 5px;
+    border-radius: 4px;
+  }
+
