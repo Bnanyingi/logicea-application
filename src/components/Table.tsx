@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import "./Table.css";
 import FilterSorting from "./FilterSorting";
 import Form from "./Form";
+import axios from 'axios';
 // import NewForm from "./NewForm";
 import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+
 
 export interface Joke {
   id?: number;
@@ -32,16 +33,21 @@ const Table: React.FC = () => {
     // navigate("/form");
   };
 
-  const handleFormSubmit = (updatedJoke: Joke) => {
-    const updatedJokes = jokes.map((joke) => {
-      if (joke.id === updatedJoke.id) {
-        return updatedJoke as Joke;
-      }
-      return joke;
-    });
-    setJokes(updatedJokes);
-    setSelectedJoke(null);
-    setShowForm(false);
+  const handleFormSubmit = async (updatedJoke: Joke) => {
+    try {
+      const response = await axios.put(
+        `https://retoolapi.dev/zu9TVE/jokes/${updatedJoke.id}`,
+        updatedJoke
+      );
+      const updatedJokes = jokes.map((joke) =>
+        joke.id === updatedJoke.id ? response.data : joke
+      );
+      setJokes(updatedJokes);
+      setSelectedJoke(null);
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error updating joke:', error);
+    }
   };
 
   const handleEdit = (joke: Joke) => {
@@ -50,10 +56,16 @@ const Table: React.FC = () => {
     // navigate("/form");
   };
 
-  const handleAddJoke = (newJoke: Joke) => {
-    const updatedJokes = [...jokes, newJoke];
-    setJokes(updatedJokes);
-    setShowForm(false);
+  const handleAddJoke = async (newJoke: Joke) => {
+    try {
+      const response = await axios.post('https://retoolapi.dev/zu9TVE/jokes', newJoke);
+      const addedJoke = response.data;
+      const updatedJokes = [...jokes, addedJoke];
+      setJokes(updatedJokes);
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error adding joke:', error);
+    }
   };
 
   const handleFormClose = () => {
@@ -180,7 +192,7 @@ const Table: React.FC = () => {
           </tbody>
         </table>
 
-        <button onClick={handleAddNewJoke}>Add New Joke</button>
+        <button className="new-button" onClick={handleAddNewJoke}>Add New Joke</button>
 
         {showForm ? (
           selectedJoke ? (
