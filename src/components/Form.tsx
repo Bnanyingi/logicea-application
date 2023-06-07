@@ -1,36 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import './Form.css';
+import { Joke } from './Table';
 
 interface FormProps {
-  initialValues: Joke;
-  onClose: () => void;
-  onSubmit: (updatedJoke: Joke) => void;
-  onDelete: () => void;
-}
-
-interface Joke {
-  id: number;
-  Title: string;
-  Body: string;
-  Author: string;
-  Views: number;
-  CreatedAt: number;
-}
+    joke?: Joke;
+    onSubmit: (updatedJoke: Joke) => void;
+    onDelete?: () => void;
+    onClose?: () => void;
+  }
 
 
-const Form: React.FC<FormProps> = ({
-  initialValues,
-  onClose,
-  onSubmit,
-  onDelete,
-}) => {
+
+
+
+const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete }) => {
   const [formValues, setFormValues] = useState<Joke>({
-    id: initialValues.id,
-    Title: initialValues.Title,
-    Body: initialValues.Body,
-    Author: initialValues.Author,
-    Views: initialValues.Views,
-    CreatedAt: initialValues.CreatedAt,
+    id: joke?.id,
+    Title: joke?.Title || '',
+    Body: joke?.Body || '',
+    Author: joke?.Author || '',
+    Views: joke?.Views || 0,
+    CreatedAt: joke?.CreatedAt || 0,
   });
+
+  useEffect(() => {
+    if (joke) {
+      setFormValues(joke);
+    }
+  }, [joke]);
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -43,57 +40,89 @@ const Form: React.FC<FormProps> = ({
   };
 
   const handleSubmit = () => {
-    const updatedJoke: Joke = {
-      id: initialValues.id,
-      Title: formValues.Title,
-      Body: formValues.Body,
-      Author: formValues.Author,
-      Views: formValues.Views,
-      CreatedAt: formValues.CreatedAt,
-    };
-
-    onSubmit(updatedJoke);
+    if (joke) {
+      const updatedJoke: Joke = {
+        id: joke.id,
+        Title: formValues.Title,
+        Body: formValues.Body,
+        Author: formValues.Author,
+        Views: formValues.Views,
+        CreatedAt: joke.CreatedAt,
+      };
+  
+      onSubmit(updatedJoke);
+    } else {
+      const newJoke: Joke = {
+        id: Date.now(),
+        Title: formValues.Title,
+        Body: formValues.Body,
+        Author: formValues.Author,
+        Views: formValues.Views,
+        CreatedAt: Date.now(),
+      };
+  
+      onSubmit(newJoke);
+    }
   };
+
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete();
+    }
+  };
+
   return (
-    <div>
+    <div className="form-container">
+      <h2>{joke ? 'Edit Joke' : 'Add New Joke'}</h2>
       <form>
-        <label htmlFor="title">Title:</label>
-        <input
-          type="text"
-          id="title"
-          name="Title"
-          value={formValues.Title}
-          onChange={handleChange}
-        />
+        <div className="form-group">
+          <label htmlFor="title">Title:</label>
+          <input
+            type="text"
+            id="title"
+            name="Title"
+            value={formValues.Title}
+            onChange={handleChange}
+          />
+        </div>
 
-        <label htmlFor="author">Author:</label>
-        <input
-          type="text"
-          id="author"
-          name="Author"
-          value={formValues.Author}
-          onChange={handleChange}
-        />
 
-        <label htmlFor="views">Views:</label>
-        <input
-          type="number"
-          id="views"
-          name="Views"
-          value={formValues.Views}
-          onChange={handleChange}
-        />
+        <div className="form-group">
+          <label htmlFor="author">Author:</label>
+          <input
+            type="text"
+            id="author"
+            name="Author"
+            value={formValues.Author}
+            onChange={handleChange}
+          />
+        </div>
 
-        <div>
+        <div className="form-group">
+          <label htmlFor="views">Views:</label>
+          <input
+            type="number"
+            id="views"
+            name="Views"
+            value={formValues.Views}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="button-group">
           <button type="button" onClick={handleSubmit}>
-            Update
+            {joke ? 'Update' : 'Submit'}
           </button>
-          <button type="button" onClick={onDelete}>
-            Delete
-          </button>
-          <button type="button" onClick={onClose}>
-            Close
-          </button>
+          {joke && (
+            <>
+              <button type="button" className="delete-button" onClick={handleDelete}>
+                Delete
+              </button>
+              <button type="button" className="close-button" onClick={onDelete}>
+                Close
+              </button>
+            </>
+          )}
         </div>
       </form>
     </div>

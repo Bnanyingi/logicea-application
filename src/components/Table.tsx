@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import "./Table.css";
 import FilterSorting from "./FilterSorting";
 import Form from "./Form";
-import { useNavigate } from 'react-router-dom';
+// import NewForm from "./NewForm";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-interface Joke {
-  id: number;
+export interface Joke {
+  id?: number;
   Title: string;
   Body: string;
   Author: string;
@@ -22,7 +23,50 @@ const Table: React.FC = () => {
   const [filterBy, setFilterBy] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [selectedJoke, setSelectedJoke] = useState<Joke | null>(null);
+  const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
+
+  const handleAddNewJoke = () => {
+    setSelectedJoke(null);
+    setShowForm(true);
+    // navigate("/form");
+  };
+
+  const handleFormSubmit = (updatedJoke: Joke) => {
+    const updatedJokes = jokes.map((joke) => {
+      if (joke.id === updatedJoke.id) {
+        return updatedJoke as Joke;
+      }
+      return joke;
+    });
+    setJokes(updatedJokes);
+    setSelectedJoke(null);
+    setShowForm(false);
+  };
+
+  const handleEdit = (joke: Joke) => {
+    setSelectedJoke(joke);
+    setShowForm(true);
+    // navigate("/form");
+  };
+
+  const handleAddJoke = (newJoke: Joke) => {
+    const updatedJokes = [...jokes, newJoke];
+    setJokes(updatedJokes);
+    setShowForm(false);
+  };
+
+  const handleFormClose = () => {
+    setSelectedJoke(null);
+    setShowForm(false);
+  };
+
+  const handleFormDelete = () => {
+    const updatedJokes = jokes.filter((joke) => joke.id !== selectedJoke?.id);
+    setJokes(updatedJokes);
+    setSelectedJoke(null);
+    setShowForm(false);
+  };
 
   const handleFilterSort = (filterBy: string, sortBy: string) => {
     setFilterBy(filterBy);
@@ -100,35 +144,11 @@ const Table: React.FC = () => {
     }
   };
 
-  const handleEdit = (joke: Joke) => {
-    setSelectedJoke(joke);
-    navigate('/form');
-  };
-
-  const handleFormClose = () => {
-    setSelectedJoke(null);
-  };
-
-  const handleFormSubmit = (updatedJoke: Joke) => {
-    const updatedJokes = jokes.map((joke) => {
-      if (joke.id === updatedJoke.id) {
-        return updatedJoke;
-      }
-      return joke;
-    });
-    setJokes(updatedJokes);
-    setSelectedJoke(null);
-  };
-
-  const handleFormDelete = () => {
-    const updatedJokes = jokes.filter((joke) => joke.id !== selectedJoke?.id);
-    setJokes(updatedJokes);
-    setSelectedJoke(null);
-  };
-
   return (
     <div>
       <FilterSorting onFilterSort={handleFilterSort} />
+      <div className="New-Joke"></div>
+
       <div className="table-container">
         <table>
           <thead>
@@ -143,9 +163,9 @@ const Table: React.FC = () => {
             {jokes.map((joke) => (
               <tr key={joke.id}>
                 <td>
-                  <Link to="/form" onClick={() => handleEdit(joke)}>
+                  <a className="link-form" onClick={() => handleEdit(joke)}>
                     {joke.Title}
-                  </Link>
+                  </a>
                 </td>
                 <td>{joke.Author}</td>
                 <td>{new Date(joke.CreatedAt).toLocaleDateString()}</td>
@@ -159,6 +179,21 @@ const Table: React.FC = () => {
             ))}
           </tbody>
         </table>
+
+        <button onClick={handleAddNewJoke}>Add New Joke</button>
+
+        {showForm ? (
+          selectedJoke ? (
+            <Form
+              joke={selectedJoke}
+              onSubmit={handleFormSubmit}
+              onClose={handleFormClose}
+              onDelete={handleFormDelete}
+            />
+          ) : (
+            <Form onSubmit={handleAddJoke} />
+          )
+        ) : null}
         <div className="pagination-container">
           <button onClick={handlePrevPage} disabled={currentPage === 1}>
             {"<"}
@@ -184,14 +219,6 @@ const Table: React.FC = () => {
           </select>
         </div>
       </div>
-      {selectedJoke && (
-      <Form
-      initialValues={selectedJoke}
-      onClose={handleFormClose}
-      onSubmit={handleFormSubmit}
-      onDelete={handleFormDelete}
-    />
-      )}
     </div>
   );
 };

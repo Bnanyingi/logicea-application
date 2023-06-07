@@ -50,7 +50,8 @@
   }
   
   .table-container td.views[data-views='51-75'] {
-    color: yellow;
+    color: 	#FFDB58;
+    font-weight: 600;
   }
   
   .table-container td.views[data-views='76-100'] {
@@ -74,6 +75,11 @@
   .pagination-container button:hover {
     background-color: #ddd;
   }
+
+  .link-form{
+    color: #0096FF;
+    cursor: pointer;
+  }
   
   .pagination-container span {
     font-weight: bold;
@@ -93,4 +99,14 @@
   
   .items-per-page-container label {
     margin-top: 10px;
+  }
+
+  .New-Joke{
+    display: flex;
+    flex-direction: row-reverse;
+   margin: 20px 14px;
+  }
+  .new-button{
+    background-color: #0096FF;
+    color: #000;
   }
