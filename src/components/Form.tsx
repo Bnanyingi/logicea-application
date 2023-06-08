@@ -1,24 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import './Form.css';
-import { Joke } from './Table';
+import React, { useState, useEffect } from "react";
+import "./Form.css";
+import { Joke } from "./Table";
 
 interface FormProps {
-    joke?: Joke;
-    onSubmit: (updatedJoke: Joke) => void;
-    onDelete?: () => void;
-    onClose?: () => void;
-  }
+  joke?: Joke;
+  onSubmit: (updatedJoke: Joke) => void;
+  onDelete?: () => void;
+  onClose?: () => void;
+}
 
-
-
-
-
-const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete }) => {
+const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete, onClose }) => {
   const [formValues, setFormValues] = useState<Joke>({
     id: joke?.id,
-    Title: joke?.Title || '',
-    Body: joke?.Body || '',
-    Author: joke?.Author || '',
+    Title: joke?.Title || "",
+    Body: joke?.Body || "",
+    Author: joke?.Author || "",
     Views: joke?.Views || 0,
     CreatedAt: joke?.CreatedAt || 0,
   });
@@ -49,7 +45,7 @@ const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete }) => {
         Views: formValues.Views,
         CreatedAt: joke.CreatedAt,
       };
-  
+
       onSubmit(updatedJoke);
     } else {
       const newJoke: Joke = {
@@ -60,7 +56,7 @@ const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete }) => {
         Views: formValues.Views,
         CreatedAt: Date.now(),
       };
-  
+
       onSubmit(newJoke);
     }
   };
@@ -71,9 +67,15 @@ const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete }) => {
     }
   };
 
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
     <div className="form-container">
-      <h2>{joke ? 'Edit Joke' : 'Add New Joke'}</h2>
+      <h2>{joke ? "Edit Joke" : "Add New Joke"}</h2>
       <form>
         <div className="form-group">
           <label htmlFor="title">Title:</label>
@@ -85,7 +87,6 @@ const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete }) => {
             onChange={handleChange}
           />
         </div>
-
 
         <div className="form-group">
           <label htmlFor="author">Author:</label>
@@ -111,18 +112,22 @@ const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete }) => {
 
         <div className="button-group">
           <button type="button" onClick={handleSubmit}>
-            {joke ? 'Update' : 'Submit'}
+            {joke ? "Update" : "Submit"}
           </button>
           {joke && (
             <>
-              <button type="button" className="delete-button" onClick={handleDelete}>
+              <button
+                type="button"
+                className="delete-button"
+                onClick={handleDelete}
+              >
                 Delete
-              </button>
-              <button type="button" className="close-button" onClick={onDelete}>
-                Close
               </button>
             </>
           )}
+          <button type="button" className="close-button" onClick={handleClose}>
+            Close
+          </button>
         </div>
       </form>
     </div>

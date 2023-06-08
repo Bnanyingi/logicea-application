@@ -2,10 +2,14 @@ import React, { useEffect, useState } from "react";
 import "./Table.css";
 import FilterSorting from "./FilterSorting";
 import Form from "./Form";
-import axios from 'axios';
+import axios from "axios";
 // import NewForm from "./NewForm";
 import { useNavigate } from "react-router-dom";
-
+import DarkModeToggle from "./DarkModeToggle";
+import { format } from "date-fns";
+import Cookies from "js-cookie";
+import Logout from "./Logout";
+import Login from "./Login";
 
 export interface Joke {
   id?: number;
@@ -17,6 +21,7 @@ export interface Joke {
 }
 
 const Table: React.FC = () => {
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token") || null);
   const [jokes, setJokes] = useState<Joke[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -25,6 +30,7 @@ const Table: React.FC = () => {
   const [sortBy, setSortBy] = useState("");
   const [selectedJoke, setSelectedJoke] = useState<Joke | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
 
   const handleAddNewJoke = () => {
@@ -46,7 +52,7 @@ const Table: React.FC = () => {
       setSelectedJoke(null);
       setShowForm(false);
     } catch (error) {
-      console.error('Error updating joke:', error);
+      console.error("Error updating joke:", error);
     }
   };
 
@@ -58,13 +64,16 @@ const Table: React.FC = () => {
 
   const handleAddJoke = async (newJoke: Joke) => {
     try {
-      const response = await axios.post('https://retoolapi.dev/zu9TVE/jokes', newJoke);
+      const response = await axios.post(
+        "https://retoolapi.dev/zu9TVE/jokes",
+        newJoke
+      );
       const addedJoke = response.data;
       const updatedJokes = [...jokes, addedJoke];
       setJokes(updatedJokes);
       setShowForm(false);
     } catch (error) {
-      console.error('Error adding joke:', error);
+      console.error("Error adding joke:", error);
     }
   };
 
@@ -73,21 +82,28 @@ const Table: React.FC = () => {
     setShowForm(false);
   };
 
-  const handleFormDelete = () => {
-    const updatedJokes = jokes.filter((joke) => joke.id !== selectedJoke?.id);
-    setJokes(updatedJokes);
-    setSelectedJoke(null);
-    setShowForm(false);
+  const handleFormDelete = async () => {
+    try {
+      if (selectedJoke) {
+        await axios.delete(
+          `https://retoolapi.dev/zu9TVE/jokes/${selectedJoke.id}`
+        );
+        const updatedJokes = jokes.filter(
+          (joke) => joke.id !== selectedJoke.id
+        );
+        setJokes(updatedJokes);
+        setSelectedJoke(null);
+        setShowForm(false);
+      }
+    } catch (error) {
+      console.error("Error deleting joke:", error);
+    }
   };
 
   const handleFilterSort = (filterBy: string, sortBy: string) => {
     setFilterBy(filterBy);
     setSortBy(sortBy);
   };
-
-  useEffect(() => {
-    fetchJokes();
-  }, [currentPage, itemsPerPage, filterBy, sortBy]);
 
   const fetchJokes = async () => {
     try {
@@ -121,6 +137,34 @@ const Table: React.FC = () => {
       console.error("Error fetching jokes:", error);
     }
   };
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const storedUsername = localStorage.getItem("username");
+  
+    if (storedToken || storedUsername) {
+      const newToken = storedToken || storedUsername;
+      setToken(newToken);
+      
+      if (newToken !== null) {
+        localStorage.setItem("token", newToken);
+      }
+    } else {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    fetchJokes();
+  }, [currentPage, itemsPerPage, filterBy, sortBy]);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }, [isDarkMode]);
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
@@ -156,9 +200,19 @@ const Table: React.FC = () => {
     }
   };
 
+  const handleDarkModeToggle = () => {
+    setIsDarkMode((prevMode) => !prevMode);
+  };
+
   return (
     <div>
+    {token ? (
+    <div>
       <FilterSorting onFilterSort={handleFilterSort} />
+      <DarkModeToggle
+        isDarkMode={isDarkMode}
+        onDarkModeToggle={handleDarkModeToggle}
+      />
       <div className="New-Joke"></div>
 
       <div className="table-container">
@@ -180,7 +234,7 @@ const Table: React.FC = () => {
                   </a>
                 </td>
                 <td>{joke.Author}</td>
-                <td>{new Date(joke.CreatedAt).toLocaleDateString()}</td>
+                <td>{format(new Date(joke.CreatedAt), "dd MMM yyyy")}</td>
                 <td style={{ color: getViewsColor(joke.Views) }}>
                   {joke.Views}
                 </td>
@@ -192,7 +246,9 @@ const Table: React.FC = () => {
           </tbody>
         </table>
 
-        <button className="new-button" onClick={handleAddNewJoke}>Add New Joke</button>
+        <button className="new-button" onClick={handleAddNewJoke}>
+          Add New Joke
+        </button>
 
         {showForm ? (
           selectedJoke ? (
@@ -203,7 +259,7 @@ const Table: React.FC = () => {
               onDelete={handleFormDelete}
             />
           ) : (
-            <Form onSubmit={handleAddJoke} />
+            <Form onSubmit={handleAddJoke} onClose={handleFormClose} />
           )
         ) : null}
         <div className="pagination-container">
@@ -231,7 +287,12 @@ const Table: React.FC = () => {
           </select>
         </div>
       </div>
+      <Logout />
     </div>
+     ) : (
+      <Login setToken={setToken} />
+    )}
+  </div>
   );
 };
 

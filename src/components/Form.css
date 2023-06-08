@@ -33,7 +33,6 @@
     padding: 8px 16px;
     border: none;
     border-radius: 4px;
-    color: #fff;
     cursor: pointer;
   }
   
@@ -47,4 +46,7 @@
   
   .close-button {
     background-color: gray;
+    color: #000;
+
   }
+  
