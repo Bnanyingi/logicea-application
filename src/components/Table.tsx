@@ -234,7 +234,7 @@ const Table: React.FC = () => {
                   </a>
                 </td>
                 <td>{joke.Author}</td>
-                <td>{format(new Date(joke.CreatedAt), "dd MMM yyyy")}</td>
+                <td>{joke.CreatedAt && format(new Date(joke.CreatedAt), "dd MMM yyyy")}</td>
                 <td style={{ color: getViewsColor(joke.Views) }}>
                   {joke.Views}
                 </td>

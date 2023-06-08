@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Form.css";
 import { Joke } from "./Table";
 
@@ -10,6 +11,7 @@ interface FormProps {
 }
 
 const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete, onClose }) => {
+  const navigate = useNavigate();
   const [formValues, setFormValues] = useState<Joke>({
     id: joke?.id,
     Title: joke?.Title || "",
@@ -59,18 +61,21 @@ const Form: React.FC<FormProps> = ({ joke, onSubmit, onDelete, onClose }) => {
 
       onSubmit(newJoke);
     }
+    navigate("/");
   };
 
   const handleDelete = () => {
     if (onDelete) {
       onDelete();
     }
+    navigate("/")
   };
 
   const handleClose = () => {
     if (onClose) {
       onClose();
     }
+    navigate("/");
   };
 
   return (
