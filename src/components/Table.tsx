@@ -238,9 +238,7 @@ const Table: React.FC = () => {
                 <td style={{ color: getViewsColor(joke.Views) }}>
                   {joke.Views}
                 </td>
-                {/* <td>
-                  <button onClick={() => handleEdit(joke)}>Edit</button>
-                </td> */}
+            
               </tr>
             ))}
           </tbody>
